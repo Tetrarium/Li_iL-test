@@ -2,11 +2,21 @@ import data from './data.json' assert { type: "json" };
 
 const arrToTree = (arr) => {
   return [...arr].reduce((a, b) => {
-    b.children = arr.filter(item => item.head === b.id);
+    if (!!b.node) {
+      b.children = arr.filter(item => item.head === b.id);;
+    }
     a.push(b);
     return a;
   }, [])
     .filter(item => item.head === null);
+}
+
+const getTotalNodePrice = (node) => {
+  if (!node.node) {
+    return node.price;
+  } else {
+    return node.children.reduce((a, b) => a + getTotalNodePrice(b), 0);
+  }
 }
 
 const createTreeDOM = (data, sortFn) => {
@@ -18,11 +28,12 @@ const createTreeDOM = (data, sortFn) => {
 
   for (let i = 0; i < sorted.length; i++) {
     const li = document.createElement('li');
-    li.textContent = sorted[i].name + ` (price: ${sorted[i].price})`;
+    const item = sorted[i];
 
-    const { children } = sorted[i];
+    li.textContent = item.name + ` (price: ${getTotalNodePrice(item)})`;
 
-    if (children.length > 0) {
+    if (!!item.node) {
+      const { children } = sorted[i];
       li.append(createTreeDOM(children, sortFn));
     }
 
